@@ -2,14 +2,13 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.CheckMenuItem?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Slider?>
-<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.Region?>
@@ -23,18 +22,13 @@
               <menus>
                 <Menu mnemonicParsing="false" text="File">
                   <items>
-                    <MenuItem fx:id="itemNew" mnemonicParsing="false" text="New" />
                         <MenuItem fx:id="itemOpen" mnemonicParsing="false" text="Open" />
-                        <MenuItem fx:id="itemSave" mnemonicParsing="false" text="Save" />
-                        <MenuItem fx:id="itemSaveAs" mnemonicParsing="false" text="Save as" />
                         <MenuItem fx:id="itemExit" mnemonicParsing="false" text="Exit" />
                   </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Tools">
                   <items>
-                        <MenuItem fx:id="itemCopy" mnemonicParsing="false" text="Copy" />
-                        <MenuItem fx:id="itemPast" mnemonicParsing="false" text="Past" />
-                        <MenuItem fx:id="itemDelete" mnemonicParsing="false" text="Delete" />
+                        <CheckMenuItem fx:id="autoReSize" mnemonicParsing="false" text="enable autoReSize" />
                   </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Help">
@@ -56,7 +50,7 @@
          <children>
             <HBox prefHeight="39.0" prefWidth="212.0">
                <children>
-                  <Button fx:id="buttonDelete" mnemonicParsing="false" text="delete">
+                  <Button fx:id="buttonRefresh" mnemonicParsing="false" text="Refresh">
                      <HBox.margin>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </HBox.margin>
@@ -80,9 +74,11 @@
                      <children>
                         <Label fx:id="labelTest" text="properties:" />
                         <Region HBox.hgrow="ALWAYS" />
-                        <Label fx:id="labelSize" text="Size: 100%" />
+                        <Label text="Size: " />
+                        <Label fx:id="labelSize" text="100" />
+                        <Label text=" %" />
                         <Button fx:id="sizeMinusButton" mnemonicParsing="false" text="-" />
-                        <Slider fx:id="sizeSlider" value="80.0" />
+                        <Slider fx:id="sizeSlider" value="100.0" />
                         <Button fx:id="sizePlusButton" mnemonicParsing="false" text="+" />
                      </children>
                      <VBox.margin>
@@ -94,27 +90,6 @@
                         <Pane fx:id="holst" />
                      </content>
                   </ScrollPane>
-               </children>
-            </VBox>
-            <VBox alignment="TOP_CENTER" minWidth="-Infinity" prefHeight="535.0" prefWidth="178.0" HBox.hgrow="ALWAYS">
-               <children>
-                  <HBox alignment="CENTER_RIGHT">
-                     <VBox.margin>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                     </VBox.margin>
-                     <children>
-                        <Label text="select cable:" />
-                        <ComboBox fx:id="selectCableBox" minWidth="-Infinity" promptText="cables">
-                           <opaqueInsets>
-                              <Insets />
-                           </opaqueInsets>
-                        </ComboBox>
-                     </children>
-                     <opaqueInsets>
-                        <Insets />
-                     </opaqueInsets>
-                  </HBox>
-                  <TextArea fx:id="outPutText" VBox.vgrow="ALWAYS" />
                </children>
             </VBox>
          </children>

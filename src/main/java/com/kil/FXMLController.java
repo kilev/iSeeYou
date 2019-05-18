@@ -1,5 +1,7 @@
 package com.kil;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,50 +13,24 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TextArea;
+import javafx.geometry.Point2D;
+import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
-import lombok.extern.java.Log;
+import javafx.stage.FileChooser;
 
 public class FXMLController {
-
-    @FXML
-    private ResourceBundle resources;
-
-    @FXML
-    private URL location;
-
-    @FXML
-    private MenuItem itemNew;
 
     @FXML
     private MenuItem itemOpen;
 
     @FXML
-    private MenuItem itemSave;
-
-    @FXML
-    private MenuItem itemSaveAs;
-
-    @FXML
     private MenuItem itemExit;
 
     @FXML
-    private MenuItem itemCopy;
-
-    @FXML
-    private MenuItem itemPast;
-
-    @FXML
-    private MenuItem itemDelete;
+    private CheckMenuItem autoReSize;
 
     @FXML
     private MenuItem itemReference;
@@ -63,13 +39,16 @@ public class FXMLController {
     private MenuItem itemAbout;
 
     @FXML
-    private Button buttonDelete;
+    private Button buttonRefresh;
 
     @FXML
     private Button buttonEdit;
 
     @FXML
     private Label labelTest;
+
+    @FXML
+    private Label labelSize;
 
     @FXML
     private Button sizeMinusButton;
@@ -80,21 +59,11 @@ public class FXMLController {
     @FXML
     private Button sizePlusButton;
 
-
     @FXML
     private ScrollPane scrollPane;
 
     @FXML
-    private Label labelSize;
-
-    @FXML
     private Pane holst;
-
-    @FXML
-    private ComboBox<String> selectCableBox;
-
-    @FXML
-    private TextArea outPutText;
 
     @FXML
     void initialize() {
@@ -107,45 +76,81 @@ public class FXMLController {
         };
         timer.start();
 
+        //size slider
         sizeSlider.valueProperty().addListener(new ChangeListener<Number>() {
             public void changed(ObservableValue<? extends Number> ov,
                                 Number old_val, Number new_val) {
-                labelSize.setText("Size: " + String.format("%.0f", new_val) + "%");
+                labelSize.setText(String.format("%.0f", new_val));
+                Logic.sizeCoef = Double.parseDouble(labelSize.getText()) / 100;
+                for (CityNode node : Logic.nodeList)
+                    Logic.computeFinPoint();
+                draw();
             }
         });
 
-        fillLists();
+        //open file
+        itemOpen.setOnAction(actionEvent -> {
+            FileChooser fc = new FileChooser();
+            File selectedFile = fc.showOpenDialog(null);
+
+            if (selectedFile != null) {
+                try {
+                    ReadController readController = new ReadController(selectedFile.getAbsolutePath());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                try {
+                    throw new IOException();
+                } catch (IOException e) {
+                    System.out.println("не указан файл!");
+                }
+            }
+            draw();
+        });
+
+        buttonRefresh.setOnAction(actionEvent -> {
+            draw();
+        });
+
+        autoReSize.setOnAction(actionEvent -> {
+            Logic.enableAutoReSize = autoReSize.isSelected();
+            Logic.computeFinPoint();
+            draw();
+        });
+
         loadTestBD();
         draw();
 
     }
 
-    private void loadTestBD(){
-        Logic.nodeList.add(new CityNode("Novosibirsk", Logic.startOffset, 20, 50, 100));
-        Logic.nodeList.add(new CityNode("Moscow", 100 + Logic.startOffset, 20, 50, 100));
-        Logic.nodeList.add(new CityNode("Kiev", 200 + Logic.startOffset, 20, 50, 100));
+    private void loadTestBD() {
+        Logic.nodeList.add(new CityNode("Novosibirsk", 0, 50, 50, 100, 10, 10));
+        Logic.nodeList.add(new CityNode("Moscow", 100 , 20, 50, 100, 10, 10));
+        Logic.nodeList.add(new CityNode("Kiev", 200 , 20, 50, 100, 1, 10));
+        Logic.computeFinPoint();
     }
 
-    private void draw(){
+    private void draw() {
         holst.getChildren().clear();
         for (CityNode node : Logic.nodeList) {
             MyPoint point = new MyPoint(node);
             holst.getChildren().add(point);
         }
+        for (Branch branch : Logic.branchList) {
+            Line line = new Line();
+            line.setStartX(Logic.nodeList.get(branch.getNodes()[0]).getPoint().getX());
+            line.setStartY(Logic.nodeList.get(branch.getNodes()[0]).getPoint().getY());
+            line.setEndX(Logic.nodeList.get(branch.getNodes()[1]).getPoint().getX());
+            line.setEndY(Logic.nodeList.get(branch.getNodes()[1]).getPoint().getY());
+            holst.getChildren().add(line);
+        }
     }
 
 
-
-    //fill lists and setup listener for them
-    private void fillLists() {
-        //for cables
-        ObservableList<String> listC = FXCollections.observableArrayList("КГ-50", "КГ-70", "КГ-100");
-        selectCableBox.setItems(listC);
-    }
-
-    private void showInfo(){
-        if(Logic.currentItem == null){
-            if(Logic.drawedInfoObjects != null){
+    private void showInfo() {
+        if (Logic.currentItem == null) {
+            if (Logic.drawedInfoObjects != null) {
                 for (Object obj : Logic.drawedInfoObjects) {
                     holst.getChildren().remove(obj);
                     Logic.drawedInfoObjects = new ArrayList<>();
@@ -156,33 +161,40 @@ public class FXMLController {
 
         List<String> list = new ArrayList();
 
-        if(Logic.currentItem instanceof CityNode){
-            CityNode node = (CityNode) Logic.currentItem; 
+        if (Logic.currentItem instanceof CityNode) {
+            CityNode node = (CityNode) Logic.currentItem;
             list = node.getInfo();
 
             double maxLabelWidthChar = 0;
             List<Label> labelList = new ArrayList<>();
             for (String str : list) {
                 Label label = new Label(str);
-                label.setTranslateY(node.getPoint().getY() + (15 * list.indexOf(str)) + Logic.infoPaneOffset);
+                label.setTranslateY(node.getFinPoint().getY() + (15 * list.indexOf(str)) + Logic.infoPaneOffset);
                 labelList.add(label);
-                if(str.length() * 7 > maxLabelWidthChar)
+                if (str.length() * 7 > maxLabelWidthChar)
                     maxLabelWidthChar = str.length() * 7;
             }
 
             Polygon polygon = new Polygon();
             polygon.getPoints().addAll(
-                    node.getPoint().getX() - maxLabelWidthChar/2, node.getPoint().getY() + Logic.infoPaneOffset,
-                    node.getPoint().getX() + maxLabelWidthChar/2, node.getPoint().getY() + Logic.infoPaneOffset,
-                    node.getPoint().getX() + maxLabelWidthChar/2, node.getPoint().getY() + list.size() * 15 + Logic.infoPaneOffset,
-                    node.getPoint().getX() - maxLabelWidthChar/2, node.getPoint().getY() + list.size() * 15 + Logic.infoPaneOffset);
+                    node.getFinPoint().getX() - maxLabelWidthChar / 2, node.getFinPoint().getY() + Logic.infoPaneOffset,
+                    node.getFinPoint().getX() + maxLabelWidthChar / 2, node.getFinPoint().getY() + Logic.infoPaneOffset,
+                    node.getFinPoint().getX() + maxLabelWidthChar / 2, node.getFinPoint().getY() + list.size() * 15 + Logic.infoPaneOffset,
+                    node.getFinPoint().getX() - maxLabelWidthChar / 2, node.getFinPoint().getY() + list.size() * 15 + Logic.infoPaneOffset);
             polygon.setFill(Color.WHITE);
             polygon.setStroke(Color.BLACK);
             holst.getChildren().add(polygon);
             Logic.drawedInfoObjects.add(polygon);
 
+            //name
+            Label labelName = new Label(node.getCityName());
+            labelName.setTranslateY(node.getFinPoint().getY() - Logic.infoPaneOffset - 15);
+            labelName.setTranslateX(node.getFinPoint().getX() - node.getCityName().length() * 3);
+            holst.getChildren().add(labelName);
+            Logic.drawedInfoObjects.add(labelName);
+            //info
             for (Label label : labelList) {
-                label.setTranslateX(node.getPoint().getX() - maxLabelWidthChar/2 + 2);
+                label.setTranslateX(node.getFinPoint().getX() - maxLabelWidthChar / 2 + 2);
                 holst.getChildren().add(label);
                 Logic.drawedInfoObjects.add(label);
             }
