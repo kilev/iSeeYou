@@ -8,7 +8,7 @@ class MyPoint extends Circle {
     CityNode cityNode;
 
     MyPoint(CityNode node) {
-        super(node.getFinPoint().getX(), node.getFinPoint().getY(), 4);
+        super(node.getFinPoint().getX(), node.getFinPoint().getY(), 6);
         this.cityNode = node;
         this.setFill(Color.GREEN);
         this.setOnMouseEntered(e -> {
@@ -18,7 +18,7 @@ class MyPoint extends Circle {
         this.setOnMouseExited(e -> {
             if(Logic.currentItem == cityNode)
                 Logic.currentItem = null;
-            this.setRadius(4);
+            this.setRadius(6);
         });
     }
 }

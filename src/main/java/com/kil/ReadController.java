@@ -15,8 +15,16 @@ public class ReadController {
                 addNode(line);
             }
             while ((line = reader.readLine()) != null) {
+                if (line.equals("LOSS")) {
+                    break;
+                }
                 addBranch(line);
             }
+            line = reader.readLine();
+            Logic.LOSS = Double.parseDouble(line);
+
+            Logic.coordConvert = new CoordConvert(Logic.nodeList);
+            Logic.coordConvert.changeCoords();
             reader.close();
         }
     }
@@ -31,8 +39,7 @@ public class ReadController {
     private  void addBranch(String line) {
         String[] info = line.split(" ");
         Branch branch = new Branch(Integer.parseInt(info[0]), Integer.parseInt(info[1]), Double.parseDouble(info[2]),
-                Double.parseDouble(info[3]), Double.parseDouble(info[4]),
-                Double.parseDouble(info[5]), Integer.parseInt(info[6]));
+                Double.parseDouble(info[3]), Double.parseDouble(info[4]), Double.parseDouble(info[5]), Integer.parseInt(info[6]));
         Logic.branchList.add(branch);
     }
 }

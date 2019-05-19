@@ -8,6 +8,7 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
@@ -29,6 +30,8 @@
                 <Menu mnemonicParsing="false" text="Tools">
                   <items>
                         <CheckMenuItem fx:id="autoReSize" mnemonicParsing="false" text="enable autoReSize" />
+                        <CheckMenuItem fx:id="worldCoord" mnemonicParsing="false" selected="true" text="world coordinates" />
+                        <CheckMenuItem fx:id="showInfoEnable" mnemonicParsing="false" text="show info" />
                   </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Help">
@@ -55,31 +58,50 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </HBox.margin>
                   </Button>
-                  <Button fx:id="buttonEdit" mnemonicParsing="false" text="Edit">
-                     <HBox.margin>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                     </HBox.margin>
-                  </Button>
                </children>
                <HBox.margin>
                   <Insets />
                </HBox.margin>
             </HBox>
-         </children></HBox>
+            <Separator HBox.hgrow="ALWAYS" />
+            <Pane prefHeight="35.0" prefWidth="218.0">
+               <children>
+                  <Label layoutY="1.0" text="Size: ">
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                  </Label>
+                  <Label fx:id="labelSize" layoutX="27.199996948242188" layoutY="1.0" text="100">
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                  </Label>
+                  <Label layoutX="47.19999694824219" layoutY="1.0" text=" %">
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                  </Label>
+                  <Slider fx:id="sizeSlider" layoutX="60.80000305175781" layoutY="1.0" value="100.0">
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                  </Slider>
+               </children>
+            </Pane>
+         </children>
+         <VBox.margin>
+            <Insets />
+         </VBox.margin>
+         <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" />
+         </padding></HBox>
       <HBox prefHeight="593.0" prefWidth="900.0" VBox.vgrow="ALWAYS">
          <children>
-            <VBox HBox.hgrow="ALWAYS">
+            <VBox prefHeight="535.0" prefWidth="901.0" HBox.hgrow="ALWAYS">
                <children>
                   <HBox alignment="CENTER" prefHeight="26.0" prefWidth="901.0">
                      <children>
-                        <Label fx:id="labelTest" text="properties:" />
                         <Region HBox.hgrow="ALWAYS" />
-                        <Label text="Size: " />
-                        <Label fx:id="labelSize" text="100" />
-                        <Label text=" %" />
-                        <Button fx:id="sizeMinusButton" mnemonicParsing="false" text="-" />
-                        <Slider fx:id="sizeSlider" value="100.0" />
-                        <Button fx:id="sizePlusButton" mnemonicParsing="false" text="+" />
                      </children>
                      <VBox.margin>
                         <Insets bottom="5.0" left="5.0" top="5.0" />

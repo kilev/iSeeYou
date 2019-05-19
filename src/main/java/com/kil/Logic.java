@@ -12,14 +12,17 @@ class Logic {
     static int startOffset = 50;
     static double sizeCoef = 1;
     static boolean enableAutoReSize;
+    static boolean worldCoord = true;
     static double maxPos;
     static Scale scale =  new Scale();
 
 
+//    static double[] LOSS = new double[4];
+    static double LOSS;
     static Object currentItem = null;
     static List<Object> drawedInfoObjects = new ArrayList<>();
 
-
+    static CoordConvert coordConvert;
     static List<CityNode> nodeList = new ArrayList<>();
     static List<Branch> branchList = new ArrayList<>();
 

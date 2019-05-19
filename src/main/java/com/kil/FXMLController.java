@@ -14,7 +14,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
-import javafx.print.PrinterJob;
+import javafx.print.*;
 import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -27,6 +27,9 @@ public class FXMLController {
 
     @FXML
     private MenuItem itemOpen;
+
+    @FXML
+    private CheckMenuItem worldCoord;
 
     @FXML
     private MenuItem itemPDF;
@@ -54,6 +57,9 @@ public class FXMLController {
 
     @FXML
     private Button sizeMinusButton;
+
+    @FXML
+    private CheckMenuItem showInfoEnable;
 
     @FXML
     private Slider sizeSlider;
@@ -118,10 +124,12 @@ public class FXMLController {
 
         //export in PDF
         itemPDF.setOnAction(actionEvent -> {
+            PageLayout pageLayout = Printer.getDefaultPrinter().createPageLayout(Paper.A4, PageOrientation.LANDSCAPE, Printer.MarginType.HARDWARE_MINIMUM);
+
             PrinterJob job = PrinterJob.createPrinterJob();
-            if(job != null){
+            if (job != null) {
                 job.showPrintDialog(holst.getScene().getWindow()); // Window must be your main Stage
-                job.printPage(holst);
+                job.printPage(pageLayout, holst);
                 job.endJob();
             }
         });
@@ -133,18 +141,23 @@ public class FXMLController {
             draw();
         });
 
-        //loadTestBD();
+        worldCoord.setOnAction(actionEvent -> {
+            Logic.worldCoord = !Logic.worldCoord;
+        });
+
+        showInfoEnable.setOnAction(actionEvent -> {
+            if(showInfoEnable.isSelected())
+                for (CityNode node : Logic.nodeList) {
+                    showMessage(node);
+                }
+            else{
+                deleteMessage();
+            }
+        });
         draw();
-
     }
 
-    private void loadTestBD() {
-        Logic.nodeList.add(new CityNode("Novosibirsk", 0, 50, 50, 100, 10, 10));
-        Logic.nodeList.add(new CityNode("Moscow", 100 , 20, 50, 100, 10, 10));
-        Logic.nodeList.add(new CityNode("Kiev", 200 , 20, 50, 100, 1, 10));
-        Logic.computeFinPoint();
-    }
-
+    //draw components
     private void draw() {
         holst.getChildren().clear();
         for (CityNode node : Logic.nodeList) {
@@ -159,12 +172,59 @@ public class FXMLController {
             line.setEndX(Logic.nodeList.get(branch.getNodes()[1]).getPoint().getX() + Logic.startOffset);
             line.setEndY(Logic.nodeList.get(branch.getNodes()[1]).getPoint().getY() + Logic.startOffset);
             line.getTransforms().add(Logic.scale);
+            line.setStrokeWidth(2);
             holst.getChildren().add(line);
         }
     }
 
 
-    private void showInfo() {
+    private void showMessage(CityNode node) {
+        if(Logic.sizeCoef != 1.0f)
+            return;
+
+        List<String> list = new ArrayList();
+
+        list = node.getInfo();
+
+        double maxLabelWidthChar = 0;
+        List<Label> labelList = new ArrayList<>();
+        for (String str : list) {
+            Label label = new Label(str);
+            label.setTranslateY(node.getFinPoint().getY() + (15 * list.indexOf(str)) + Logic.infoPaneOffset);
+            labelList.add(label);
+            if (str.length() * 7 > maxLabelWidthChar)
+                maxLabelWidthChar = str.length() * 7;
+        }
+
+        Polygon polygon = new Polygon();
+        polygon.getPoints().addAll(
+                node.getFinPoint().getX() - maxLabelWidthChar / 2, node.getFinPoint().getY() + Logic.infoPaneOffset,
+                node.getFinPoint().getX() + maxLabelWidthChar / 2, node.getFinPoint().getY() + Logic.infoPaneOffset,
+                node.getFinPoint().getX() + maxLabelWidthChar / 2, node.getFinPoint().getY() + list.size() * 15 + Logic.infoPaneOffset,
+                node.getFinPoint().getX() - maxLabelWidthChar / 2, node.getFinPoint().getY() + list.size() * 15 + Logic.infoPaneOffset);
+        polygon.setFill(Color.WHITE);
+        polygon.setStroke(Color.BLACK);
+        polygon.getTransforms().add(Logic.scale);
+        holst.getChildren().add(polygon);
+        Logic.drawedInfoObjects.add(polygon);
+
+        //name
+        Label labelName = new Label(node.getCityName());
+        labelName.getTransforms().add(Logic.scale);
+        labelName.setTranslateY(node.getFinPoint().getY() - Logic.infoPaneOffset - 15);
+        labelName.setTranslateX(node.getFinPoint().getX() - node.getCityName().length() * 3);
+        holst.getChildren().add(labelName);
+        Logic.drawedInfoObjects.add(labelName);
+        //info
+        for (Label label : labelList) {
+            label.getTransforms().add(Logic.scale);
+            label.setTranslateX(node.getFinPoint().getX() - maxLabelWidthChar / 2 + 2);
+            holst.getChildren().add(label);
+            Logic.drawedInfoObjects.add(label);
+        }
+    }
+
+    private void deleteMessage(){
         if (Logic.currentItem == null) {
             if (Logic.drawedInfoObjects != null) {
                 for (Object obj : Logic.drawedInfoObjects) {
@@ -174,52 +234,20 @@ public class FXMLController {
             }
             return;
         }
+    }
 
-        List<String> list = new ArrayList();
+
+    private void showInfo() {
+        if (showInfoEnable.isSelected())
+            return;
+
+        deleteMessage();
 
         if (Logic.currentItem instanceof CityNode) {
             CityNode node = (CityNode) Logic.currentItem;
-            list = node.getInfo();
-
-            double maxLabelWidthChar = 0;
-            List<Label> labelList = new ArrayList<>();
-            for (String str : list) {
-                Label label = new Label(str);
-                label.setTranslateY(node.getFinPoint().getY() + (15 * list.indexOf(str)) + Logic.infoPaneOffset);
-                labelList.add(label);
-                if (str.length() * 7 > maxLabelWidthChar)
-                    maxLabelWidthChar = str.length() * 7;
-            }
-
-            Polygon polygon = new Polygon();
-            polygon.getPoints().addAll(
-                    node.getFinPoint().getX() - maxLabelWidthChar / 2, node.getFinPoint().getY() + Logic.infoPaneOffset,
-                    node.getFinPoint().getX() + maxLabelWidthChar / 2, node.getFinPoint().getY() + Logic.infoPaneOffset,
-                    node.getFinPoint().getX() + maxLabelWidthChar / 2, node.getFinPoint().getY() + list.size() * 15 + Logic.infoPaneOffset,
-                    node.getFinPoint().getX() - maxLabelWidthChar / 2, node.getFinPoint().getY() + list.size() * 15 + Logic.infoPaneOffset);
-            polygon.setFill(Color.WHITE);
-            polygon.setStroke(Color.BLACK);
-            polygon.getTransforms().add(Logic.scale);
-            holst.getChildren().add(polygon);
-            Logic.drawedInfoObjects.add(polygon);
-
-            //name
-            Label labelName = new Label(node.getCityName());
-            labelName.setTranslateY(node.getFinPoint().getY() - Logic.infoPaneOffset - 15);
-            labelName.setTranslateX(node.getFinPoint().getX() - node.getCityName().length() * 3);
-            labelName.getTransforms().add(Logic.scale);
-            holst.getChildren().add(labelName);
-            Logic.drawedInfoObjects.add(labelName);
-            //info
-            for (Label label : labelList) {
-                label.setTranslateX(node.getFinPoint().getX() - maxLabelWidthChar / 2 + 2);
-                label.getTransforms().add(Logic.scale);
-                holst.getChildren().add(label);
-                Logic.drawedInfoObjects.add(label);
-            }
+            showMessage(node);
         }
-        //else
-        //fillProperties(((Branch) Logic.currentItem).cityNode.getInfo());
+
     }
 }
 
