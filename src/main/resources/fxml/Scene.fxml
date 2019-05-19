@@ -23,7 +23,7 @@
                 <Menu mnemonicParsing="false" text="File">
                   <items>
                         <MenuItem fx:id="itemOpen" mnemonicParsing="false" text="Open" />
-                        <MenuItem fx:id="itemExit" mnemonicParsing="false" text="Exit" />
+                        <MenuItem fx:id="itemPDF" mnemonicParsing="false" text="Export in PDF" />
                   </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Tools">

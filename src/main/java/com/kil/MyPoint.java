@@ -10,16 +10,15 @@ class MyPoint extends Circle {
     MyPoint(CityNode node) {
         super(node.getFinPoint().getX(), node.getFinPoint().getY(), 4);
         this.cityNode = node;
+        this.setFill(Color.GREEN);
         this.setOnMouseEntered(e -> {
             Logic.currentItem = cityNode;
             this.setRadius(8);
-            this.setFill(Color.BLUE);
         });
         this.setOnMouseExited(e -> {
             if(Logic.currentItem == cityNode)
                 Logic.currentItem = null;
             this.setRadius(4);
-            this.setFill(Color.BLACK);
         });
     }
 }
